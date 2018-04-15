@@ -147,7 +147,7 @@ public class Controller
          * This loop is necessary as it loops through each player in the game to
          * discard their cards.
          */
-        for (int i = 0; i < myModel.getNumberOfPlayers() - 1; i++)
+        for (int i = 0; i < 1; i++)
         {
             /**
              * We must first get the player that is currently up.

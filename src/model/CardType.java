@@ -1,12 +1,5 @@
 package model;
 
-/**
- * Enumeration of possible values for cards. 
- * Can return numerical equivalent.
- * @author Tierney Irwin
- * @author Christopher Finkle
- */
-
 public enum CardType
 {
 	TWO (2),
@@ -25,24 +18,11 @@ public enum CardType
 	
 	private final int myType;
 	
-	/**
-	 * Constructor sets myType to the integer value type given.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 */
 	private CardType (int type)
 	{
 		myType = type;
 	}
 	
-	/**
-	 * Method returns the myType value.
-	 * 
-	 * @return myType integer value of CardType
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 */
 	public int getType()
 	{
 		return myType;

@@ -1,180 +1,138 @@
 package model;
-import java.awt.Image;
 
-/**
- * Deck class constructs the deck of the poker game 
- * and deals with the mechanics involved solely with 
- * the deck of the game.
- * 
- * @author Tierney Irwin
- * @author Christopher Finkle
- * 
- * Due Date: 21 March 2016
- */
 import java.util.Collections;
 import java.util.Vector;
 
-import javax.swing.ImageIcon;
-
+/**
+ * The purpose of the deck class is to simulate a poker deck.
+ * This deck is constructed with 52 cards of each combination
+ * of the card suit and card types. You can draw a card,
+ * clone the deck for comparisons, and shuffle the deck. 
+ * 
+ * @author BaileyGranam
+ * 
+ * @due 03/22/2017
+ *
+ */
 public class Deck
 {
 	private Vector<Card> myCards;
-	private final int myFullDeckSize = 52;
-
+	
+	final private static int DECK_SIZE = 52;
+	
 	/**
-	 * Deck constructor initializes the cards contained 
-	 * in the deck as a vector of cards, constructs and 
-	 * shuffles that deck made.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
+	 * Deck constructor is used to call the constructDeck() method
+	 * and to initiate the myCards Vector of size (DECK_SIZE).
 	 */
+
 	public Deck()
 	{
-		myCards=new Vector<Card>();
+		myCards = new Vector<Card>(DECK_SIZE);
+		
 		constructDeck();
-		shuffle();
 	}
 
-	/**
-	 * Method constructDeck() is used to create 
-	 * the 52 card deck out of all the values listed 
-	 * in the enumerations CardSuit and CardType.
+	/** 
+	 * The purpose of the constructDeck() method is to loop through
+	 * the enumerations of the CardSuit and CardType classes and
+	 * create a card for each combination. It inserts each card
+	 * into the vector myCards. At the end it checks to see
+	 * if the vector has the correct size of 52.
 	 * 
-	 * @return true creating the deck correctly.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
+	 * @return true if 52 cards / false if anything else.
 	 */
+	
 	public boolean constructDeck()
 	{
-		for(CardSuit suit: CardSuit.values())
+		for(CardSuit suit : CardSuit.values())
 		{
-			for(CardType type: CardType.values())
+			for(CardType type : CardType.values())
 			{
-				Image myCardImage = getImage(suit.getSuit().charAt(0), type.getType());
-				myCards.add(new Card(suit,type,myCardImage));
+				Card myCard = new Card(suit, type, null);
+				myCards.add(myCard);
 			}
 		}
-		return true;
+		
+		if(myCards.size() == DECK_SIZE)
+		{
+			return true;
+		}
+		else 
+		{
+			return false;
+		}
 	}
 	
 	/**
-	 * Method to retrieve the image of the card using the suit and type.
-	 */
-	public Image getImage(char suit, int type)
-	{
-		String myCardName = (type + "" + suit);
-		ImageIcon myCardImageIcon = new ImageIcon("src/images/"+myCardName+".gif");
-		Image myCardImage = myCardImageIcon.getImage();
-		return myCardImage;
-	}
-	
-
-	/**
-	 * Method draw() is used to take a card from the deck, 
-	 * thus removing its values from the deck currently in use.
+	 * The purpose of the draw() method is so that when it is 
+	 * called the card on the top of the deck is removed and
+	 * given to the user. 
 	 * 
-	 * @return null/card depending on if the deck is empty or 
-	 * if there is a card that can be returned.
+	 * (The card at index 0 of the vector is given to the user
+	 * and removed from the deck of cards).
 	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
+	 * @return myDraw <-- Card on top of the deck
 	 */
 	public Card draw()
 	{
-		if(myCards.isEmpty())
+		if(myCards.size() > 0)
+		{
+			Card myDraw = myCards.lastElement();
+			myCards.remove(myDraw);
+			return myDraw;
+		}
+		else 
 		{
 			return null;
 		}
-		else
-		{
-			Card card = myCards.remove(0);
-			return card;
-		}
 	}
 
 	/**
-	 * Method shuffle() is used to shuffle the vector of cards making up the deck.
+	 * The purpose of the shuffle() method is to randomize the
+	 * deck of poker cards. It works using the Collections 
+	 * java utility. The way we check to see if the shuffle
+	 * works is that we compare the shuffled deck to a clone
+	 * of the original deck.
 	 * 
-	 * @return true having the deck properly shuffled.
+	 * @return true if shuffled / false if not shuffled properly
 	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
 	 */
+	
 	public boolean shuffle()
 	{
+		Vector<Card> myOriginalCards = new Vector<Card>();
+		myOriginalCards = myCards;
 		Collections.shuffle(myCards);
-		return true;
-	}
-	
-	/**
-	 * Method getFullDeckSize() returns the integer amount of a full deck.
-	 * 
-	 * @return myFullDeckSize the size of a full deck, which is 52.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
-	 */
-	public int getFullDeckSize()
-	{
-		return myFullDeckSize;
-	}
-	
-	/**
-	 * Method getCards() returns the vector of cards making up the current deck.
-	 * 
-	 * @return myCards all the cards currently in the deck.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
-	 */
-	public Vector<Card> getCards()
-	{
-		return myCards;
+		
+		return (myCards != myOriginalCards);
 	}
 
 	/**
-	 * Method toString() creates a user friendly look into the deck and its contents.
-	 * 
-	 * @return String of the deck and its contents.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
+	 * Output the state of the deck class
 	 */
+	
 	public String toString()
 	{
-		String str = "Deck has "+getCards().size()+"cards containing: ";
-		for(Card c : this.myCards)
-		{
-			str = str +" "+ c.toString();
-		}
-		return str;
+		return "Deck: " + myCards;
 	}
-
+	
 	/**
-	 * Method clone() clones the currently deck into myCloneDeck to avoid aliasing.
-	 * 
-	 * @return myCloneDeck replica of current deck in use.
-	 * 
-	 * @author Tierney Irwin
-	 * @author Christopher Finkle
-	 *
+	 * Method to clone() the deck for comparisons
+	 * such as checking to see that the deck
+	 * shuffled.
 	 */
+
 	public Object clone()
 	{
-		Deck myCloneDeck = new Deck();
-		for(int i = 0;i<myFullDeckSize;i++)
+		Deck myDeckClone = new Deck();
+	
+		myDeckClone.myCards.removeAllElements();
+		
+		for(Card card : myCards)
 		{
-			myCloneDeck.getCards().insertElementAt(myCards.elementAt(i), i);
+			myDeckClone.myCards.addElement(card);
 		}
-		return myCloneDeck;
+		
+		return myDeckClone;
 	}
 }

@@ -2,339 +2,409 @@ package model;
 
 import java.util.Vector;
 
-/**
- * Extension of hand model that is meant specifically for 5-card poker.
- * PokerHand can be classified into various rankings of poker hand.
- * 
- * @author Christopher Finkle
- * @author Tierney Irwin
- */
+import model.CardType;
 
+/**
+ * The main purpose of the poker hand class is to evaluate the hand and 
+ * determine the ranking of the hand.
+ * 
+ * @author BaileyGranam
+ * 
+ * @due 03/22/2017
+ *
+ */
 public class PokerHand extends Hand
 {
 
 	private int myNumberCards;
 	private int myMaxNumberCards;
-	private boolean myIsHighCard;
-	private boolean myIsPair;
-	private boolean myIsThreeOfKind;
-	private boolean myIsTwoPair;
-	private boolean myIsStraight;
-	private boolean myIsFlush;
-	private boolean myIsFullHouse;
-	private boolean myIsFourOfKind;
-	private boolean myIsStraightFlush;
-	private boolean myIsRoyalFlush;
-	
+	private Hand myHand;
+
 	public PokerHand(int maxNum)
 	{
 		super(maxNum);
-		myMaxNumberCards=maxNum;
 	}
 
 	/**
-	 * helper function flags all cards as relevant
+	 * Large statement to determine the ranking of the poker hand, Goes from
+	 * largest to smallest possible rank.
 	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
+	 * @return rank of hand.
 	 */
-	private void allCardsRelevant()
+	public PokerHandRanking determineRanking()
 	{
-		for(Card c : myCards)
+		if(isRoyalFlush())
 		{
-			c.setRelevance(true);
+			return PokerHandRanking.ROYAL_FLUSH;
+		}
+		else if(isStraightFlush())
+		{
+			return PokerHandRanking.STRAIGHT_FLUSH;
+		}
+		else if(isFourOfKind())
+		{
+			return PokerHandRanking.FOUR_OF_KIND;
+		}
+		else if(isFullHouse())
+		{
+			return PokerHandRanking.FULL_HOUSE;
+		}
+		else if(isFlush())
+		{
+			return PokerHandRanking.FLUSH;
+		}
+		else if(isStraight())
+		{
+			return PokerHandRanking.STRAIGHT;
+		}
+		else if(isThreeOfKind())
+		{
+			return PokerHandRanking.THREE_OF_KIND;
+		}
+		else if(isTwoPair())
+		{
+			return PokerHandRanking.TWO_PAIR;
+		}
+		else if(isPair())
+		{
+			return PokerHandRanking.PAIR;
+		}
+		else
+		{
+			return PokerHandRanking.HIGH_CARD;
 		}
 	}
 	
 	/**
-	 * This function evaluates the hand for various properties and uses
-	 * these properties to determine what ranking the hand should have.
+	 * This method takes the current poker hand and compares it to the 
+	 * hand being passed through the @param of the method.
 	 * 
-	 * pre: Hand's myCards must contain 5 cards.
-	 * post: appropriate boolean variable denoting hand type is true.
+	 * @param pokerHand
 	 * 
-	 * @return the pokerHandRanking object that describes the hand.
-	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
+	 * @return value of comparison
 	 */
-	public PokerHandRanking determineRanking()
-	{
-		this.orderCards();
-		
-		//ensures no residual relevance from previous rankings.
-		for(Card c: myCards)
-		{
-			c.setRelevance(false);
-		}
-		
-		//if every card has same suit, is flush
-		boolean tempFlush = true;
-		for(Card c: myCards)
-		{
-			tempFlush = tempFlush && c.getSuit()==myCards.get(0).getSuit();
-		}
-		
-		//We need to know if it has an ace because they cause exceptions for Straights.
-		boolean tempHasAce = myCards.lastElement().getType()==CardType.ACE;
-		boolean tempStraight = true;
-		
-		//index for straight check is off-by-one in normal case
-		//but off-by-two in exceptional case w/ A and 2
-		int exception = 1;
-		if(myCards.firstElement().getType()==CardType.TWO && tempHasAce)
-		{
-			exception = 2;
-		}
-		
-		//checks that each card's value is one less than its successor, allowance made for ace.
-		for(int i=0; i<myCards.size()-exception; i++)
-		{
-			tempStraight = tempStraight && 
-					myCards.get(i).getType().getType()+1==myCards.get(i+1).getType().getType();
-		}
-		
-		//classifies all flush or straight hands based on previous evaluation
-		if(tempStraight && tempFlush && tempHasAce && exception==1)
-		{
-			myIsRoyalFlush=true;
-			this.allCardsRelevant();
-			return PokerHandRanking.ROYAL_FLUSH;
-		}
-		else if(tempStraight && tempFlush)
-		{
-			myIsStraightFlush=true;
-			this.allCardsRelevant();
-			return PokerHandRanking.STRAIGHT_FLUSH;
-		}
-		else if(tempStraight){
-			myIsStraight=true;
-			this.allCardsRelevant();
-			return PokerHandRanking.STRAIGHT;
-		}
-		else if(tempFlush){
-			myIsFlush=true;
-			this.allCardsRelevant();
-			return PokerHandRanking.FLUSH;
-		}
-		
-		//tests for four of a kind starting from index 0 or 1
-		boolean tempFour;
-		for(int i=0; i<=1; i++)
-		{
-			tempFour=true;
-			CardType kind = myCards.get(i).getType();
-			for(int j=1; j<4; j++)
-			{
-				tempFour = tempFour && myCards.get(i+j).getType()==kind;
-			}
-			if(tempFour)
-			{
-				for(int r=0; r<4; r++)
-				{
-					myCards.get(i+r).setRelevance(true);
-				}
-				myIsFourOfKind = true;
-				return PokerHandRanking.FOUR_OF_KIND;
-			}
-		}
-		
-		//tests for three of a kind starting from index 0, 1, or 2
-		boolean tempThree;
-		for(int i=0; i<=2; i++)
-		{
-			tempThree = true;
-			CardType kind = myCards.get(i).getType();
-			for(int j=1; j<3; j++)
-			{
-				tempThree = tempThree && myCards.get(i+j).getType()==kind;
-			}
-			if(tempThree)
-			{
-				for(int r=0; r<3; r++)
-				{
-					myCards.get(i+r).setRelevance(true);
-				}
-				//if three of kind, possibility of full house. 
-				//Checks remaining pair for match.
-				if(myCards.get((i+3)%5).getType()==myCards.get((i+4)%5).getType())
-				{
-					myIsFullHouse = true;
-					return PokerHandRanking.FULL_HOUSE;
-				}
-				myIsThreeOfKind = true;
-				return PokerHandRanking.THREE_OF_KIND;
-			}
-		}
-		
-		//checks for pairs starting at index 0,1,2, or 3.
-		boolean tempPair;
-		for(int i=0; i<=3; i++)
-		{
-			tempPair = myCards.get(i).getType()==myCards.get(i+1).getType();
-			if(tempPair)
-			{
-				myCards.get(i).setRelevance(true);
-				myCards.get(i+1).setRelevance(true);
-				//if one pair, possibility of two pair (full house already weeded out)
-				//Checks remaining three cards for pairs.
-				for(int j=0; j<=1; j++)
-				{
-					if(myCards.get((i+2+j)%5).getType()==myCards.get((i+3+j)%5).getType())
-					{
-						myCards.get(i+2+j).setRelevance(true);
-						myCards.get(i+3+j).setRelevance(true);
-						myIsTwoPair=true;
-						return PokerHandRanking.TWO_PAIR;
-					}
-				}
-				myIsPair=true;
-				return PokerHandRanking.PAIR;
-			}
-		}
-		//If no other hand was flagged, must be high card by default.
-		myCards.lastElement().setRelevance(true);
-		myIsHighCard = true;
-		return PokerHandRanking.HIGH_CARD;
-	}
 
-	/**
-	 * compares pokerHand to another one, taking into account 
-	 * tie-breaker rules by comparing relevant cards to each other, highest first.
-	 * 
-	 * @param pokerHand: the pokerhand to which we wish to compare this.
-	 * @return 1 if our hand wins, -1 if our hand loses, 0 in unlikely event of tie.
-	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
-	 */
 	public int compareTo(PokerHand pokerHand)
 	{
-		if(this.getRanking()>pokerHand.getRanking())
-		{
-			return 1;
-		}
-		else if(this.getRanking()<pokerHand.getRanking())
+		if (this.getRanking() < pokerHand.getRanking())
 		{
 			return -1;
 		}
+		if (this.getRanking() > pokerHand.getRanking())
+		{
+			return 1;
+		}
 		else
 		{
-			Vector<Card> r1 = new Vector<Card>();
-			Vector<Card> r2 = new Vector<Card>();
-			for(int i=4; i>=0; i--)
-			{
-				if(myCards.get(i).isRelevant())
-				{
-					r1.add(myCards.get(i));
-				}
-				if(pokerHand.getCards().get(i).isRelevant())
-				{
-					r2.add(pokerHand.getCards().get(i));
-				}
-			}
-			for(int j=0; j<r1.size(); j++)
-			{
-				int compare = r1.get(j).compareTo(r2.get(j));
-				if(compare!=0)
-				{
-					return compare;
-				}
-			}
+			return 0;
 		}
-		return 0;
+	}
+
+	public String toString()
+	{
+		return "Hand: " + myHand;
 	}
 
 	/**
-	 * toString lists cards and gives ranking (I hope!)
-	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
+	 * Calls the determineRanking() function and gets the rank of the hand.
+	 * @return ranking
 	 */
-	public String toString()
-	{
-		String str = "Hand containing";
-		for(Card c : myCards)
-		{
-			str = str + " " + c.toString();
-		}
-		str = str + ". Ranking: "+this.getRanking();
-		return str;
-	}
-
 	public int getRanking()
 	{
-		return this.determineRanking().getRank();
+		return determineRanking().getRank();
 	}
+	
+	/**
+	 * Getter for number of cards
+	 * @return getNumberCards
+	 */
 
 	public int getNumberCards()
 	{
 		return myNumberCards;
 	}
 
+	/**
+	 * Getter for max number of cards.
+	 * @return myMaxNumberCards
+	 */
 	public int getMaxNumberCards()
 	{
 		return myMaxNumberCards;
 	}
 
+	/**
+	 * This method checks to see if the Poker Hand has a high card.
+	 * There will always be a high card unless the player's hand is
+	 * empty.
+	 * 
+	 * @return The method will return true if there is at least 1 card in
+	 * the hand. False if there are no cards.
+	 */
 	public boolean isHighCard()
-	{
-		this.determineRanking();
-		return myIsHighCard;
+	{	
+		Vector<Card> myCheck = getCards();
+
+		if(myCheck.size() > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
 	}
 
+	/**
+	 * This method checks to see if there is a pair of cards in the
+	 * Poker Hand of the same type. This can be checked by looping
+	 * through each card in the vector and comparing the type to 
+	 * the next card.
+	 * 
+	 * @return True if there is 1 pair then true, otherwise false.
+	 */
 	public boolean isPair()
 	{
-		this.determineRanking();
-		return myIsPair;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+		for(int i = 0; i < myCheck.size() - 2; i++)
+		{
+			if(myCheck.get(i).getType() == myCheck.get(i+1).getType())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
+	/**
+	 * This method checks to see if there are two pairs of cards in the
+	 * Poker Hand of the same type. This can be checked by looping
+	 * through each card in the vector and comparing the type to 
+	 * the next card. If there is a pair then we will increment
+	 * myPairs by 1. At the end we will see if myPairs == 2.
+	 * 
+	 * @return True if there is 2 pairs then true, otherwise false.
+	 */
 	public boolean isTwoPair()
 	{
-		this.determineRanking();
-		return myIsTwoPair;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		int myPairs = 0;
+
+		for(int i = 0; i < myCheck.size() - 2; i++)
+		{
+			if(myCheck.get(i).getType() == myCheck.get(i+1).getType())
+			{
+				myPairs += 1;
+			}
+		}
+
+		if(myPairs == 2) 
+		{
+			return true;
+		}
+		else 
+		{ 
+			return false;
+		}
 	}
+
+	/**
+	 * This method checks to see if there is three cards in the
+	 * Poker Hand of the same type. This can be checked by comparing
+	 * the first three cards in the hand. If the fourth card is also
+	 * the same type then it is 4 of a kind and does not pass the
+	 * 3 of a kind test.
+	 * 
+	 * @return True if there is 3 of a kind then true, otherwise false.
+	 */
 
 	public boolean isThreeOfKind()
 	{
-		this.determineRanking();
-		return myIsThreeOfKind;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		if(myCheck.get(0).getType() == myCheck.get(1).getType() 
+				&& myCheck.get(1).getType() == myCheck.get(2).getType()
+				&& myCheck.get(2).getType() != myCheck.get(3).getType())
+		{
+			return true;
+		}
+
+		return false;
 	}
 
+	/**
+	 * This method checks to see if there are five cards of which
+	 * all are in incremental sequence such as 2, 3, 4, 5, 6. This 
+	 * is evaluated by looping through and seeing if value at index
+	 * (i) + 1 is equal to the value at index (i + 1).
+	 * 
+	 * @return True if there is a straight, otherwise false.
+	 */
 	public boolean isStraight()
 	{
-		this.determineRanking();
-		return myIsStraight;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		for(int i = 0; i < myCheck.size() - 1; i++)
+		{
+			if(myCheck.get(i).getType()+1 != myCheck.get(i+1).getType())
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
+	/**
+	 * This method checks to see if there are five cards of which
+	 * all are of the same suit such as 5 cards all hearts. This 
+	 * is evaluated by looping through and seeing if suit at index
+	 * (i) is equal to the suit at index (i + 1). It also checks
+	 * to make sure that it is not a sequence. If it were then it 
+	 * would be a straight flush.
+	 * 
+	 * @return True if there is a flush, otherwise false.
+	 */
 	public boolean isFlush()
 	{
-		this.determineRanking();
-		return myIsFlush;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		for(int i = 0; i < myCheck.size() - 1; i++)
+		{
+			if(myCheck.get(i).getSuit() != myCheck.get(i+1).getSuit()
+					|| myCheck.get(i).getType()+1 == myCheck.get(i+1).getType())
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
+	/**
+	 * Test to see if the Poker Hand has both three of a kind and a pair.
+	 * We check both possibility such that you can have 1 pair 1 three of 
+	 * a kind or reversed.
+	 * 
+	 * @return True if there is a full house, otherwise false.
+	 */
 	public boolean isFullHouse()
 	{
-		this.determineRanking();
-		return myIsFullHouse;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		if(myCheck.get(0).getType() == myCheck.get(1).getType() 
+				&& myCheck.get(1).getType() == myCheck.get(2).getType()
+				&& myCheck.get(3).getType() == myCheck.get(4).getType())
+		{
+			return true;
+		}
+		if(myCheck.get(0).getType() == myCheck.get(1).getType() 
+				&& myCheck.get(2).getType() == myCheck.get(3).getType()
+				&& myCheck.get(3).getType() == myCheck.get(4).getType())
+		{
+			return true;
+		}
+
+		return false;
 	}
+
+	/**
+	 * This method checks to see if there is four cards in the
+	 * Poker Hand of the same type. This can be checked by comparing
+	 * the first four cards in the hand. 
+	 * 
+	 * This method also checks to make sure that there are no duplicate
+	 * cards. I.e two cards that are same type of same suit.
+	 * 
+	 * @return True if there is 4 of a kind then true, otherwise false.
+	 */
 
 	public boolean isFourOfKind()
 	{
-		this.determineRanking();
-		return myIsFourOfKind;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+		
+		for(int i = 0; i < myCheck.size() - 1; i++)
+		{
+			if(myCheck.get(i).getType() == myCheck.get(i+1).getType()
+					&& myCheck.get(i).getSuit() == myCheck.get(i+1).getSuit())
+			{
+				return false;
+			}
+		}
+
+		if(myCheck.get(0).getType() == myCheck.get(1).getType() 
+				&& myCheck.get(1).getType() == myCheck.get(2).getType()
+				&& myCheck.get(2).getType() == myCheck.get(3).getType())
+		{
+			return true;
+		}
+
+		return false;
 	}
 
+	/**
+	 * This method is a combination of the isStraight() and isFlush() methods.
+	 * It checks to see that the Poker Hand is both a straight and a flush.
+	 * 
+	 * @return True if straight flush, otherwise false.
+	 */
 	public boolean isStraightFlush()
 	{
-		this.determineRanking();
-		return myIsStraightFlush;
+		orderCards();
+		Vector<Card> myCheck = getCards();
+
+		for(int i = 0; i < myCheck.size() - 1; i++)
+		{
+			if(myCheck.get(i).getType()+1 != myCheck.get(i+1).getType())
+			{
+				return false;
+			}
+			
+			if(myCheck.get(i).getSuit() != myCheck.get(i+1).getSuit())
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
+	
+	/**
+	 * This method checks to see that all the cards are of the same suit
+	 * and that they each increment such that they are in order of
+	 * Ten, Jack, King, Queen, Ace. 
+	 * 
+	 * @return true if royal flush, false otherwise
+	 */
 
 	public boolean isRoyalFlush()
 	{
-		this.determineRanking();
-		return myIsRoyalFlush;
-	}
+		orderCards();
+		Vector<Card> myCheck = getCards();
 
+		for(int i = 0; i < myCheck.size() - 1; i++)
+		{
+			if(myCheck.get(i).getType() != 10+i)
+			{
+				return false;
+			}
+			
+			if(myCheck.get(i).getSuit() != myCheck.get(i+1).getSuit())
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }

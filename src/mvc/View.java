@@ -130,6 +130,7 @@ public class View
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myFrame.setSize(1000, 600);
         myFrame.setLayout(new GridLayout(5, 1));
+        
 
         // Position Labels
         myPlayerName.setHorizontalAlignment(JLabel.LEFT);
@@ -173,7 +174,7 @@ public class View
         myFrame.add(myPlayerCardsPanel);
         myFrame.add(myButtonsPanel);
         myFrame.add(myGameInfoPanel);
-
+       
         // Extra Frame Properties
         myFrame.setLocationRelativeTo(null);
         myFrame.setResizable(false);

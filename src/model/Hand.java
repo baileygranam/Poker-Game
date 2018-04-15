@@ -1,13 +1,14 @@
 package model;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 /**
  * Model of a hand for a card game - cards can be added, discarded,
  * and put in order.
- * @author Christopher Finkle
- * @author Tierney Irwin
+ * 
+ * @author Bailey Granam
  */
 
 public class Hand
@@ -24,10 +25,7 @@ public class Hand
 	/**
 	 * If hand can still accept more cards, and card is unique, adds card.
 	 * @param card: the card to be added
-	 * @return whether or not operation suceeded
-	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
+	 * @return whether or not operation succeeded
 	 */
 	public boolean add(Card card)
 	{
@@ -52,9 +50,6 @@ public class Hand
 	/**
 	 * Removes flagged cards. Intended to be used by Player
 	 * @return cards discarded
-	 * 
-	 * @author Christopher FInkle
-	 * @author Tierney Irwin
 	 */
 	public Vector<Card> discard()
 	{
@@ -73,8 +68,6 @@ public class Hand
 	 * Flags cards to be removed, then removes them.
 	 * @param indices: vector of indices of cards to be removed
 	 * @return a vector containing the discarded cards
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
 	 */
 	
 	public Vector<Card> discard(Vector<Integer> indices)
@@ -97,9 +90,6 @@ public class Hand
 
 	/**
 	 * lists cards in hand
-	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
 	 */
 	public String toString()
 	{
@@ -113,12 +103,17 @@ public class Hand
 
 	/**
 	 * Puts cards in order from least value to greatest
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
 	 */
 	public void orderCards()
 	{
-		Collections.sort(myCards);
+	      Collections.sort(myCards, new Comparator<Card>() 
+	        {
+	            @Override
+	            public int compare(Card o1, Card o2) 
+	            {
+	                return o1.compareTo(o2);
+	            }
+	        });
 	}
 
 	public int getNumberCardsInHand()

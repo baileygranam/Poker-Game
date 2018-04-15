@@ -1,12 +1,5 @@
 package model;
 
-/**
- * Enumeration of possible poker hand values.
- * Can return relative numerical ranking of hand.
- * @author Tierney Irwin
- * @author Christopher Finkle
- */
-
 public enum PokerHandRanking
 {
 	HIGH_CARD (1), 

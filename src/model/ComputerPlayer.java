@@ -3,48 +3,128 @@ package model;
 import java.util.Vector;
 
 /**
- * AI opponent for a poker game.
- * @author Christopher Finkle
- * @author Tierney Irwin
+ * The purpose of the ComputerPlayer class is so that a player may play with a
+ * simple AI. Specific cards are discarded based on the hand of the computer.
+ * 
+ * @author BaileyGranam
+ * 
+ * @due 03/22/2017
+ *
  */
-
 public class ComputerPlayer extends Player
 {
-	public ComputerPlayer()
-	{
-		super();
-		myAmAI = true;
-	}
 	public ComputerPlayer(String name)
 	{
 		super(name);
 		myAmAI = true;
 	}
-
+	
 	/**
-	 * If has hand using all 5 cards, keeps it. If has hand using fewer
-	 * than all 5 cards, discards as many cards as possible, starting 
-	 * with the lowest-valued that are not part of the poker hand in question.
-	 * @return vector containing indices of cards to be discarded.
+	 * The purpose of this large method is to determine what cards the AI should discard
+	 * depending on the status of the poker hand and the position of the cards. The cards
+	 * are removed and we return the vector of discarded cards.
 	 * 
-	 * @author Christopher Finkle
-	 * @author Tierney Irwin
+	 * @return myDiscards
 	 */
 	public Vector<Integer> selectCardsToDiscard()
 	{
-		Vector<Integer> discards = new Vector<Integer>(0);
-		if(myHand.getRanking()<5)
+		Vector<Integer> myDiscards = new Vector<Integer>();
+
+		if (myHand.isRoyalFlush() || myHand.isStraightFlush() || myHand.isFourOfKind() || myHand.isFullHouse()
+				|| myHand.isFlush() || myHand.isStraight())
 		{
-			for(int i=0; i<5; i++)
-			{
-				if(!myHand.getCards().get(i).isRelevant() && discards.size()<3)
-				{
-					discards.add(i);
-				}
-			}
+			return myDiscards;
 		}
-		return discards;
+
+		if(myHand.isThreeOfKind())
+		{
+			if(myHand.getCards().get(0).getType() == myHand.getCards().get(1).getType()
+			&& myHand.getCards().get(1).getType() == myHand.getCards().get(2).getType())
+			{
+				myDiscards.add(3);
+				myDiscards.add(4);
+
+				myHand.discard(myDiscards);
+
+			}
+			else if(myHand.getCards().get(1).getType() == myHand.getCards().get(2).getType()
+			&& myHand.getCards().get(2).getType() == myHand.getCards().get(3).getType())
+			{
+				myDiscards.add(0);
+				myDiscards.add(4);
+
+				myHand.discard(myDiscards);
+			}
+			else
+			{
+				myDiscards.add(0);
+				myDiscards.add(1);
+				
+				myHand.discard(myDiscards);
+			}
+			return myDiscards;
+		}
+
+		if(myHand.isTwoPair())
+		{
+			if(myHand.getCards().get(0).getType() == myHand.getCards().get(1).getType()
+					&& myHand.getCards().get(2).getType() == myHand.getCards().get(3).getType())
+			{
+				myDiscards.add(4);
+				myHand.discard(myDiscards);
+
+			}
+			else
+			{
+				myDiscards.add(0);
+
+				myHand.discard(myDiscards);
+			}
+
+			return myDiscards;
+		}
+
+		if(myHand.isPair())
+		{
+			if(myHand.getCards().get(0).getType() == myHand.getCards().get(1).getType())
+			{
+				myDiscards.add(2);
+				myDiscards.add(3);
+				myDiscards.add(4);
+
+				myHand.discard(myDiscards);
+
+			}
+			else if(myHand.getCards().get(1).getType() == myHand.getCards().get(2).getType())
+			{
+				myDiscards.add(0);
+				myDiscards.add(3);
+				myDiscards.add(4);
+
+				myHand.discard(myDiscards);
+			}
+			else
+			{
+				myDiscards.add(1);
+				myDiscards.add(2);
+				myDiscards.add(3);
+				myHand.discard(myDiscards);
+			}
+			return myDiscards;
+		}
+
+		if(myHand.isHighCard())
+		{
+			myDiscards.add(0);
+			myDiscards.add(1);
+			myDiscards.add(2);
+
+			myHand.discard(myDiscards);
+
+			return myDiscards;
+		}
+		return myDiscards;
+
 	}
-	
 	
 }
